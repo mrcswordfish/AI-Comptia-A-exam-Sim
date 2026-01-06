@@ -5,6 +5,12 @@ type QuestionTemplate = Omit<Question, "id">;
 
 /* 
   CompTIA A+ Core 1 (220-1201) Question Bank
+  Comprehensive coverage of:
+  1.0 Mobile Devices (13%)
+  2.0 Networking (23%)
+  3.0 Hardware (25%)
+  4.0 Virtualization and Cloud Computing (11%)
+  5.0 Hardware and Network Troubleshooting (28%)
 */
 export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
   "1.0 Mobile Devices": [
@@ -26,7 +32,6 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "NFC (Near Field Communication) is the standard used for contactless payments on mobile devices."
     },
-    // ... (Keeping previous items, updating with objectiveId)
     {
       type: "multiple-choice",
       domain: "1.0 Mobile Devices",
@@ -36,7 +41,24 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 2,
       explanation: "The backlight (typically LED in modern laptops, or CCFL in older ones) provides the illumination."
     },
-    // PBQ Template: Mobile Device Configuration
+    {
+      type: "multiple-choice",
+      domain: "1.0 Mobile Devices",
+      objectiveId: "1.3",
+      text: "A user is traveling and needs to connect their laptop to the internet using their smartphone's data plan. Which feature should be enabled?",
+      options: ["Airplane Mode", "Hotspot / Tethering", "VPN", "NFC"],
+      correctAnswerIndex: 1,
+      explanation: "Hotspot or Tethering allows a mobile device to share its cellular data connection with other devices via Wi-Fi, Bluetooth, or USB."
+    },
+    {
+      type: "multiple-choice",
+      domain: "1.0 Mobile Devices",
+      objectiveId: "1.4",
+      text: "Which type of memory form factor is primarily used in laptops?",
+      options: ["DIMM", "SODIMM", "ECC", "VRAM"],
+      correctAnswerIndex: 1,
+      explanation: "Small Outline Dual In-line Memory Module (SODIMM) is the compact RAM standard for laptops."
+    },
     {
       type: "pbq",
       domain: "1.0 Mobile Devices",
@@ -71,7 +93,24 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "DHCP (Dynamic Host Configuration Protocol) assigns IP addresses and network configuration to devices automatically."
     },
-    // PBQ Template: SOHO Router Configuration
+    {
+      type: "multiple-choice",
+      domain: "2.0 Networking",
+      objectiveId: "2.3",
+      text: "Which wireless standard operates ONLY on the 5GHz frequency band?",
+      options: ["802.11n", "802.11ac", "802.11g", "802.11b"],
+      correctAnswerIndex: 1,
+      explanation: "802.11ac is exclusive to the 5GHz band. 802.11n can operate on both 2.4GHz and 5GHz."
+    },
+    {
+      type: "multiple-choice",
+      domain: "2.0 Networking",
+      objectiveId: "2.5",
+      text: "A technician needs to terminate a CAT6 cable to a patch panel. Which tool is MOST appropriate?",
+      options: ["Crimper", "Punchdown tool", "Wire stripper", "Toner probe"],
+      correctAnswerIndex: 1,
+      explanation: "A punchdown tool is used to terminate wires into insulation-displacement connectors (IDC) on patch panels and keystone jacks."
+    },
     {
       type: "pbq",
       domain: "2.0 Networking",
@@ -86,7 +125,6 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "For security: WPA3 is current standard, Guest Networks provide VLAN isolation from the main network (POS), and changing default creds is mandatory."
     },
-    // PBQ Template: Wiring Standards
     {
       type: "pbq",
       domain: "2.0 Networking",
@@ -112,7 +150,24 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 2,
       explanation: "RAID 5 uses striping with parity. It provides fault tolerance and requires a minimum of 3 disks."
     },
-    // PBQ Template: PC Build
+    {
+      type: "multiple-choice",
+      domain: "3.0 Hardware",
+      objectiveId: "3.1",
+      text: "A video editor needs a new monitor with the highest color accuracy. Which panel type should you recommend?",
+      options: ["TN", "IPS", "VA", "OLED"],
+      correctAnswerIndex: 1,
+      explanation: "In-Plane Switching (IPS) panels typically offer the best color accuracy and viewing angles compared to TN or VA."
+    },
+    {
+      type: "multiple-choice",
+      domain: "3.0 Hardware",
+      objectiveId: "3.5",
+      text: "Which motherboard form factor is the largest among common consumer boards?",
+      options: ["Mini-ITX", "Micro-ATX", "ATX", "E-ATX"],
+      correctAnswerIndex: 3,
+      explanation: "Extended ATX (E-ATX) is larger than standard ATX, Micro-ATX, and Mini-ITX."
+    },
     {
       type: "pbq",
       domain: "3.0 Hardware",
@@ -138,7 +193,15 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 2,
       explanation: "IaaS (Infrastructure as a Service) provides the basic compute resources. The customer manages the OS and applications."
     },
-    // PBQ Template: Virtualization Resource Allocation
+    {
+      type: "multiple-choice",
+      domain: "4.0 Virtualization and Cloud Computing",
+      objectiveId: "4.2",
+      text: "Which cloud characteristic allows for resources to be automatically scaled outward and inward commensurate with demand?",
+      options: ["Rapid Elasticity", "On-demand self-service", "Broad network access", "Resource pooling"],
+      correctAnswerIndex: 0,
+      explanation: "Rapid Elasticity enables the cloud environment to automatically add or remove resources based on traffic load."
+    },
     {
       type: "pbq",
       domain: "4.0 Virtualization and Cloud Computing",
@@ -164,7 +227,24 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "Beep codes are specific to the BIOS/motherboard manufacturer and indicate which hardware component is failing during POST."
     },
-    // PBQ Template: Printer Troubleshooting
+    {
+      type: "multiple-choice",
+      domain: "5.0 Hardware and Network Troubleshooting",
+      objectiveId: "5.2",
+      text: "A user reports a loud clicking noise coming from their computer case. The computer is also running very slowly. What is the most likely cause?",
+      options: ["Failing SSD", "Failing Mechanical Hard Drive (HDD)", "Loose Fan", "Coil Whine"],
+      correctAnswerIndex: 1,
+      explanation: "The 'Click of Death' is a classic symptom of a mechanical hard drive read/write head failure."
+    },
+    {
+      type: "multiple-choice",
+      domain: "5.0 Hardware and Network Troubleshooting",
+      objectiveId: "5.4",
+      text: "A projector is shutting down intermittently. You notice a warning light on the chassis. What is the most likely cause?",
+      options: ["Dead pixel", "Overheating / Bulb failure", "Incorrect resolution", "Keystone misalignment"],
+      correctAnswerIndex: 1,
+      explanation: "Projectors produce significant heat. Warning lights usually indicate overheating or that the bulb is reaching the end of its life."
+    },
     {
       type: "pbq",
       domain: "5.0 Hardware and Network Troubleshooting",
@@ -184,6 +264,11 @@ export const CORE_1_BANK: Record<string, QuestionTemplate[]> = {
 
 /* 
   CompTIA A+ Core 2 (220-1202) Question Bank
+  Comprehensive coverage of:
+  1.0 Operating Systems (28%)
+  2.0 Security (28%)
+  3.0 Software Troubleshooting (23%)
+  4.0 Operational Procedures (21%)
 */
 export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
   "1.0 Operating Systems": [
@@ -196,7 +281,24 @@ export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "'diskpart' is the command-line utility for managing disks, partitions, and volumes in Windows."
     },
-    // PBQ Template: Disk Partitioning
+    {
+      type: "multiple-choice",
+      domain: "1.0 Operating Systems",
+      objectiveId: "1.2",
+      text: "Which file system is the default for macOS installations?",
+      options: ["NTFS", "ext4", "APFS", "FAT32"],
+      correctAnswerIndex: 2,
+      explanation: "APFS (Apple File System) is the modern default file system for macOS, optimized for flash storage."
+    },
+    {
+      type: "multiple-choice",
+      domain: "1.0 Operating Systems",
+      objectiveId: "1.9",
+      text: "Which Linux command allows a user to run a command with superuser (root) privileges?",
+      options: ["chmod", "chown", "sudo", "grep"],
+      correctAnswerIndex: 2,
+      explanation: "'sudo' (SuperUser DO) allows a permitted user to execute a command as the superuser or another user."
+    },
     {
       type: "pbq",
       domain: "1.0 Operating Systems",
@@ -211,7 +313,6 @@ export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 2,
       explanation: "Striped Volumes (RAID 0) write data across multiple disks to improve performance but offer no redundancy."
     },
-    // PBQ Template: Command Line Tools
     {
       type: "pbq",
       domain: "1.0 Operating Systems",
@@ -237,7 +338,24 @@ export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "The Principle of Least Privilege states that users should have only the bare minimum access rights needed."
     },
-    // PBQ Template: Wireless Security Hardening
+    {
+      type: "multiple-choice",
+      domain: "2.0 Security",
+      objectiveId: "2.1",
+      text: "Which of the following is considered 'Something you are' in multi-factor authentication?",
+      options: ["Smart Card", "Password", "Fingerprint", "GPS Location"],
+      correctAnswerIndex: 2,
+      explanation: "Biometrics like fingerprints, retina scans, and facial recognition fall under the 'Something you are' factor."
+    },
+    {
+      type: "multiple-choice",
+      domain: "2.0 Security",
+      objectiveId: "2.4",
+      text: "A user receives an email that looks like it's from their bank asking for their password. This is an example of:",
+      options: ["Tailgating", "Phishing", "Dumpster Diving", "Man-in-the-middle"],
+      correctAnswerIndex: 1,
+      explanation: "Phishing is a social engineering attack where an attacker sends fraudulent emails to trick the recipient into revealing sensitive info."
+    },
     {
       type: "pbq",
       domain: "2.0 Security",
@@ -263,7 +381,15 @@ export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 1,
       explanation: "The error code on the BSOD provides the critical clue needed to identify the driver or hardware causing the crash."
     },
-    // PBQ Template: Malware Removal Workflow
+    {
+      type: "multiple-choice",
+      domain: "3.0 Software Troubleshooting",
+      objectiveId: "3.2",
+      text: "An app on an Android phone keeps crashing immediately after opening. What is the first logical step to try?",
+      options: ["Factory reset the phone", "Clear the app cache/data", "Root the device", "Replace the battery"],
+      correctAnswerIndex: 1,
+      explanation: "Clearing the app cache or data often resolves corruption issues causing the crash. It is less destructive than a factory reset."
+    },
     {
       type: "pbq",
       domain: "3.0 Software Troubleshooting",
@@ -289,7 +415,15 @@ export const CORE_2_BANK: Record<string, QuestionTemplate[]> = {
       correctAnswerIndex: 2,
       explanation: "The Material Safety Data Sheet (MSDS) or Safety Data Sheet (SDS) lists hazards and safety measures for chemicals."
     },
-    // PBQ Template: Ticket Triage
+    {
+      type: "multiple-choice",
+      domain: "4.0 Operational Procedures",
+      objectiveId: "4.3",
+      text: "Which backup type copies all selected files but does not mark them as backed up (archive bit remains on)?",
+      options: ["Full Backup", "Incremental Backup", "Differential Backup", "Copy Backup"],
+      correctAnswerIndex: 3,
+      explanation: "A Copy Backup captures the data but does not clear the archive bit, so it does not affect the rotation of Incremental/Differential backups."
+    },
     {
       type: "pbq",
       domain: "4.0 Operational Procedures",

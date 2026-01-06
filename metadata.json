@@ -1,0 +1,5 @@
+{
+  "name": "CompTIA A+ Exam Simulator",
+  "description": "A realistic CompTIA A+ practice exam application covering Core 1 (220-1201) and Core 2 (220-1202) objectives using Gemini AI for dynamic question generation.",
+  "requestFramePermissions": []
+}

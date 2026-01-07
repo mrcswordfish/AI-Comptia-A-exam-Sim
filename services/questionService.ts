@@ -1,5 +1,6 @@
-import { CoreType, Question, CORE_1_DOMAINS, CORE_2_DOMAINS, QUESTIONS_PER_EXAM } from "../types";
+import { CoreType, Question, QUESTIONS_PER_EXAM } from "../types";
 import { CORE_1_BANK, CORE_2_BANK } from "../data/questionBank";
+import { generateExamQuestions as generateWithAI } from "./geminiService";
 
 // Distribution Config based on CompTIA Percentages
 const CORE_1_DISTRIBUTION = [
@@ -27,21 +28,35 @@ const shuffle = <T>(array: T[]): T[] => {
   return newArray;
 };
 
-// Helper to select N random items from a list, repeating if necessary to fill the quota
+// Helper to select N random items WITHOUT repetition if possible
 const selectRandomQuestions = (sourceQuestions: any[], count: number): any[] => {
   if (sourceQuestions.length === 0) return [];
   
-  let selected: any[] = [];
-  // If we need more than we have, shuffle and repeat
-  while (selected.length < count) {
-    const shuffled = shuffle(sourceQuestions);
-    selected = [...selected, ...shuffled];
+  const shuffled = shuffle(sourceQuestions);
+  
+  // If we have enough unique questions, return slice
+  if (shuffled.length >= count) {
+    return shuffled.slice(0, count);
   }
-  // Trim to exact count
-  return selected.slice(0, count);
+  
+  // If we don't have enough, return ALL of them (avoid repeats in session)
+  // The Exam UI will just be shorter than 90 questions, which is better than duplicates.
+  return shuffled;
 };
 
 export const generateExamQuestions = async (core: CoreType): Promise<Question[]> => {
+  
+  // 1. Try AI Generation first if API Key is present
+  if (process.env.API_KEY) {
+    try {
+       console.log("Generating questions using Gemini AI...");
+       return await generateWithAI(core);
+    } catch (e) {
+       console.error("AI Generation failed, falling back to static bank:", e);
+    }
+  }
+
+  // 2. Fallback to Static Bank
   // Simulate a short delay to feel like "generating"
   await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -50,7 +65,6 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
   const bank = isCore1 ? CORE_1_BANK : CORE_2_BANK;
 
   let allQuestions: Question[] = [];
-  let questionIdCounter = 1;
 
   // Calculate quota for each domain and select questions
   let totalAllocated = 0;
@@ -60,36 +74,33 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
     // Calculate raw count
     let count = Math.round(QUESTIONS_PER_EXAM * dist.percent);
     
-    // Adjust last domain to ensure we hit exactly 90 (fix rounding errors)
+    // Adjust last domain to ensure we hit exactly target (fix rounding errors)
     if (i === distribution.length - 1) {
       count = QUESTIONS_PER_EXAM - totalAllocated;
     }
-    totalAllocated += count;
-
+    
     // Get questions for this domain from bank
     const domainQuestions = bank[dist.domain] || [];
     
-    if (domainQuestions.length === 0) {
-      console.warn(`No questions found for domain: ${dist.domain}`);
-      continue;
-    }
-
+    // Select unique questions
     const selectedTemplates = selectRandomQuestions(domainQuestions, count);
+    
+    // Track how many we actually got (might be less than count if bank is small)
+    totalAllocated += selectedTemplates.length;
 
-    // Map to Question objects with unique IDs
+    // Map to Question objects with temporary IDs
     const mappedQuestions: Question[] = selectedTemplates.map(t => ({
       ...t,
-      // We assign temporary IDs here, but will re-index at the end to be clean 1-90
       id: 0 
     }));
 
     allQuestions = [...allQuestions, ...mappedQuestions];
   }
 
-  // Final shuffle of the entire exam so domains are mixed (like real exam)
+  // Final shuffle of the entire exam so domains are mixed
   allQuestions = shuffle(allQuestions);
 
-  // Re-assign sequential IDs 1 to 90
+  // Re-assign sequential IDs 1 to N
   return allQuestions.map((q, index) => ({
     ...q,
     id: index + 1

@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
-import { CoreType, Question, CORE_1_DOMAINS, CORE_2_DOMAINS, QUESTIONS_PER_EXAM } from "../types";
+import { CoreType, Question, CORE_1_DOMAINS, CORE_2_DOMAINS } from "../types";
 
 export const generateExamQuestions = async (core: CoreType): Promise<Question[]> => {
   const apiKey = process.env.API_KEY;
@@ -13,25 +13,27 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
   const domains = isCore1 ? CORE_1_DOMAINS : CORE_2_DOMAINS;
   const examName = isCore1 ? "CompTIA A+ Core 1 (220-1201)" : "CompTIA A+ Core 2 (220-1202)";
   
-  // Generating 90 questions in one go is often too slow or exceeds token limits.
-  // We will generate a smaller batch of high-quality questions for the simulation 
-  // if the user uses AI, or you can implement Promise.all with multiple requests for full 90.
-  // For this demo, we'll request 45 questions (half exam) to ensure speed and reliability, 
-  // or you can bump this to 90 if using a high-throughput model.
-  const questionCount = 45; 
+  // To ensure high quality and prevent timeouts, we generate a solid set of 50 questions per session.
+  // This simulates the exam experience while remaining within typical API latency windows.
+  const questionCount = 50;
 
   const prompt = `
-    You are a senior CompTIA A+ exam creator. Create a practice exam for ${examName}.
-    
-    The exam MUST cover these domains:
+    You are an expert CompTIA A+ certification exam creator. 
+    Create a unique, randomized practice exam for: ${examName}.
+
+    The exam MUST strictly cover the following domains based on official objectives:
     ${domains.join('\n')}
 
-    Generate ${questionCount} unique, challenging multiple-choice questions.
-    - Questions must be scenario-based.
-    - Include 5-10 PBQ style scenario descriptions (formatted as multiple choice for this UI).
-    - Ensure varied difficulty.
-    
-    Return the response as a JSON array inside a 'questions' property.
+    INSTRUCTIONS:
+    1. Generate exactly ${questionCount} questions.
+    2. Ensure NO QUESTIONS ARE REPEATED in this set.
+    3. Questions must be scenario-based (e.g., "A technician is...", "A user reports...").
+    4. Include exactly 5 Performance Based Question (PBQ) style scenarios (text-based simulation descriptions).
+    5. Difficulty should vary between easy (definitions), medium (troubleshooting), and hard (complex scenarios).
+    6. Provide clear, educational explanations for the correct answer.
+
+    OUTPUT FORMAT:
+    Return valid JSON. The root object must have a "questions" array.
   `;
 
   const questionSchema: Schema = {
@@ -42,18 +44,18 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
         items: {
           type: Type.OBJECT,
           properties: {
-            id: { type: Type.INTEGER },
-            domain: { type: Type.STRING },
+            domain: { type: Type.STRING, description: "The domain name (e.g. 1.0 Mobile Devices)" },
             objectiveId: { type: Type.STRING, description: "The specific objective ID (e.g. 1.2)" },
-            text: { type: Type.STRING },
+            text: { type: Type.STRING, description: "The question text/scenario" },
             options: {
               type: Type.ARRAY,
-              items: { type: Type.STRING }
+              items: { type: Type.STRING },
+              description: "Exactly 4 options"
             },
-            correctAnswerIndex: { type: Type.INTEGER, description: "Zero-based index of the correct option (0-3)" },
-            explanation: { type: Type.STRING, description: "Detailed explanation." }
+            correctAnswerIndex: { type: Type.INTEGER, description: "0-3 index of the correct option" },
+            explanation: { type: Type.STRING, description: "Detailed explanation of why the answer is correct" }
           },
-          required: ["id", "domain", "objectiveId", "text", "options", "correctAnswerIndex", "explanation"]
+          required: ["domain", "objectiveId", "text", "options", "correctAnswerIndex", "explanation"]
         }
       }
     },
@@ -62,12 +64,12 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp', // Using a fast, high-context model
+      model: 'gemini-2.0-flash-exp', 
       contents: prompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: questionSchema,
-        temperature: 0.7,
+        temperature: 0.8, // High temperature for variety
       }
     });
 
@@ -78,12 +80,12 @@ export const generateExamQuestions = async (core: CoreType): Promise<Question[]>
 
     const data = JSON.parse(jsonText);
     
-    // Post-processing
+    // Post-processing to match internal App types
     const processedQuestions: Question[] = data.questions.map((q: any, index: number) => ({
-      id: index + 1,
+      id: index + 1, // temporary ID
       domain: q.domain || "General",
       objectiveId: q.objectiveId || "1.0",
-      type: q.text.includes("SIMULATION") ? 'pbq' : 'multiple-choice',
+      type: (q.text.includes("SIMULATION") || q.text.includes("PBQ")) ? 'pbq' : 'multiple-choice',
       text: q.text,
       options: q.options.slice(0, 4),
       correctAnswerIndex: q.correctAnswerIndex,

@@ -1,108 +1,26 @@
-import { CoreType, Question, QUESTIONS_PER_EXAM } from "../types";
-import { CORE_1_BANK, CORE_2_BANK } from "../data/questionBank";
+import { CoreType, Question } from "../types";
 import { generateExamQuestions as generateWithAI } from "./geminiService";
 
-// Distribution Config based on CompTIA Percentages
-const CORE_1_DISTRIBUTION = [
-  { domain: "1.0 Mobile Devices", percent: 0.13 },
-  { domain: "2.0 Networking", percent: 0.23 },
-  { domain: "3.0 Hardware", percent: 0.25 },
-  { domain: "4.0 Virtualization and Cloud Computing", percent: 0.11 },
-  { domain: "5.0 Hardware and Network Troubleshooting", percent: 0.28 }
-];
-
-const CORE_2_DISTRIBUTION = [
-  { domain: "1.0 Operating Systems", percent: 0.28 },
-  { domain: "2.0 Security", percent: 0.28 },
-  { domain: "3.0 Software Troubleshooting", percent: 0.23 },
-  { domain: "4.0 Operational Procedures", percent: 0.21 }
-];
-
-// Helper to shuffle array
-const shuffle = <T>(array: T[]): T[] => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
-
-// Helper to select N random items WITHOUT repetition if possible
-const selectRandomQuestions = (sourceQuestions: any[], count: number): any[] => {
-  if (sourceQuestions.length === 0) return [];
-  
-  const shuffled = shuffle(sourceQuestions);
-  
-  // If we have enough unique questions, return slice
-  if (shuffled.length >= count) {
-    return shuffled.slice(0, count);
-  }
-  
-  // If we don't have enough, return ALL of them (avoid repeats in session)
-  // The Exam UI will just be shorter than 90 questions, which is better than duplicates.
-  return shuffled;
-};
-
 export const generateExamQuestions = async (core: CoreType): Promise<Question[]> => {
-  
-  // 1. Try AI Generation first if API Key is present
-  if (process.env.API_KEY) {
-    try {
-       console.log("Generating questions using Gemini AI...");
-       return await generateWithAI(core);
-    } catch (e) {
-       console.error("AI Generation failed, falling back to static bank:", e);
-    }
+  // Check for API Key
+  if (!process.env.API_KEY) {
+    throw new Error("Missing API_KEY. Please configure your environment to use the AI Exam Simulator.");
   }
 
-  // 2. Fallback to Static Bank
-  // Simulate a short delay to feel like "generating"
-  await new Promise(resolve => setTimeout(resolve, 800));
-
-  const isCore1 = core === CoreType.CORE_1;
-  const distribution = isCore1 ? CORE_1_DISTRIBUTION : CORE_2_DISTRIBUTION;
-  const bank = isCore1 ? CORE_1_BANK : CORE_2_BANK;
-
-  let allQuestions: Question[] = [];
-
-  // Calculate quota for each domain and select questions
-  let totalAllocated = 0;
+  console.log(`Generating fresh ${core} exam session using Gemini AI...`);
   
-  for (let i = 0; i < distribution.length; i++) {
-    const dist = distribution[i];
-    // Calculate raw count
-    let count = Math.round(QUESTIONS_PER_EXAM * dist.percent);
+  // Use Gemini AI to generate the full exam session.
+  // The AI service handles uniqueness, domain distribution, and question variety.
+  try {
+    const questions = await generateWithAI(core);
     
-    // Adjust last domain to ensure we hit exactly target (fix rounding errors)
-    if (i === distribution.length - 1) {
-      count = QUESTIONS_PER_EXAM - totalAllocated;
-    }
-    
-    // Get questions for this domain from bank
-    const domainQuestions = bank[dist.domain] || [];
-    
-    // Select unique questions
-    const selectedTemplates = selectRandomQuestions(domainQuestions, count);
-    
-    // Track how many we actually got (might be less than count if bank is small)
-    totalAllocated += selectedTemplates.length;
-
-    // Map to Question objects with temporary IDs
-    const mappedQuestions: Question[] = selectedTemplates.map(t => ({
-      ...t,
-      id: 0 
+    // Assign sequential IDs for the UI to handle navigation properly
+    return questions.map((q, index) => ({
+      ...q,
+      id: index + 1
     }));
-
-    allQuestions = [...allQuestions, ...mappedQuestions];
+  } catch (error) {
+    console.error("AI Generation failed:", error);
+    throw new Error("Failed to generate exam questions. Please try again.");
   }
-
-  // Final shuffle of the entire exam so domains are mixed
-  allQuestions = shuffle(allQuestions);
-
-  // Re-assign sequential IDs 1 to N
-  return allQuestions.map((q, index) => ({
-    ...q,
-    id: index + 1
-  }));
 };
